@@ -1,52 +1,46 @@
 const express = require('express');
-const bodyParser = require('body-parser');
 const cors = require('cors');
 
+const port = process.env.port || 3001;
 const app = express();
-const port = process.env.PORT || 3000;
-
-app.use(bodyParser.json());
 app.use(cors());
+app.use(express.json());
 
-const user = {
-    user_id: "john_doe_17091999",  // Replace with your full_name_ddmmyyyy
-    email: "john@xyz.com",         // Replace with your email
-    roll_number: "ABCD123"         // Replace with your roll number
-};
-
-// POST Method: /bfhl
 app.post('/bfhl', (req, res) => {
-    const { data } = req.body;
-    const numbers = [];
-    const alphabets = [];
-    let highestLowercaseAlphabet = "";
+  const { data } = req.body;
 
-    data.forEach(item => {
-        if (!isNaN(item)) {
-            numbers.push(item);
-        } else if (/[a-zA-Z]/.test(item)) {
-            alphabets.push(item);
-            if (/[a-z]/.test(item) && item > highestLowercaseAlphabet) {
-                highestLowercaseAlphabet = item;
-            }
-        }
+  if (!data || !Array.isArray(data)) {
+    return res.status(400).json({
+      is_success: false,
+      user_id: "Sagar", 
+      email: "sagariscool002@gmail.com", 
+      roll_number: "21BCI0065", 
+      message: "Invalid data format",
     });
+  }
 
-    res.json({
-        is_success: true,
-        ...user,
-        numbers,
-        alphabets,
-        highest_lowercase_alphabet: highestLowercaseAlphabet ? [highestLowercaseAlphabet] : []
-    });
+  const numbers = data.filter(item => !isNaN(item));
+  const alphabets = data.filter(item => isNaN(item));
+  const highest_lowercase_alphabet = alphabets
+    .filter(item => /^[a-z]$/.test(item))
+    .sort()
+    .slice(-1);
+
+  res.json({
+    is_success: true,
+    user_id: "Sagar", 
+    email: "sagariscool002@gmail.com", 
+    roll_number: "21BCI0065", 
+    numbers,
+    alphabets,
+    highest_lowercase_alphabet,
+  });
 });
 
-// GET Method: /bfhl
 app.get('/bfhl', (req, res) => {
-    res.status(200).json({
-        operation_code: 1
-    });
+  res.status(200).json({ operation_code: 1 });
 });
+
 
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
